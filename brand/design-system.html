@@ -1,0 +1,403 @@
+<title>Print2Pack Design System</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&family=Poppins:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root{
+    --paper:#F5F5F9;
+    --card:#FFFFFF;
+    --ink:#15152E;
+    --ink-2:#4B4B6A;
+    --ink-3:#83839C;
+    --rule:#DFDFEA;
+    --rule-2:#EDEDF4;
+    --brand:#241E70;
+    --accent:#F17825;
+    --bad:#C4362B;
+    --bad-bg:#FBECEA;
+    --shadow:0 1px 2px rgba(21,21,46,.06), 0 10px 30px -20px rgba(21,21,46,.45);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#0E0E1C;
+      --card:#17172B;
+      --ink:#E9E9F2;
+      --ink-2:#ACACC4;
+      --ink-3:#7C7C97;
+      --rule:#2A2A45;
+      --rule-2:#20203A;
+      --brand:#9A93E8;
+      --accent:#FF9447;
+      --bad:#F0837A;
+      --bad-bg:#2B1815;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px -20px rgba(0,0,0,.9);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#0E0E1C; --card:#17172B; --ink:#E9E9F2; --ink-2:#ACACC4; --ink-3:#7C7C97;
+    --rule:#2A2A45; --rule-2:#20203A; --brand:#9A93E8; --accent:#FF9447;
+    --bad:#F0837A; --bad-bg:#2B1815;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px -20px rgba(0,0,0,.9);
+  }
+
+  body{background:var(--paper); color:var(--ink);
+       font-family:Poppins,-apple-system,Segoe UI,sans-serif; font-size:16px; line-height:1.6;}
+  .wrap{max-width:900px; margin:0 auto; padding-inline:20px; padding-block:0 80px;}
+  .disp{font-family:Oswald,Impact,sans-serif;}
+  mono,.mono{font-family:"IBM Plex Mono",ui-monospace,monospace;}
+
+  header.mast{border-bottom:4px solid var(--brand); padding-block:44px 22px;}
+  header.mast .eyebrow{font-family:Oswald,sans-serif; font-size:12px; font-weight:500;
+    letter-spacing:.22em; text-transform:uppercase; color:var(--accent);}
+  header.mast h1{font-family:Oswald,sans-serif; font-weight:700; text-transform:uppercase;
+    font-size:clamp(30px,6vw,52px); line-height:1; letter-spacing:.01em; margin:10px 0 0;
+    text-wrap:balance;}
+  header.mast p{color:var(--ink-2); margin:12px 0 0; max-width:60ch; font-size:15px;}
+
+  h2{font-family:Oswald,sans-serif; font-weight:700; text-transform:uppercase;
+     font-size:22px; letter-spacing:.04em; margin:56px 0 0; color:var(--ink);
+     display:flex; align-items:baseline; gap:12px;}
+  h2::after{content:""; flex:1; height:2px; background:var(--rule);}
+  .lede{color:var(--ink-2); margin:10px 0 0; max-width:66ch; font-size:15px;}
+  h3{font-family:Oswald,sans-serif; font-weight:500; text-transform:uppercase; font-size:14px;
+     letter-spacing:.1em; color:var(--ink-3); margin:30px 0 12px;}
+
+  /* swatches */
+  .swatches{display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:14px; margin-top:16px;}
+  .sw{background:var(--card); border:1px solid var(--rule); border-radius:10px; overflow:hidden;
+      box-shadow:var(--shadow);}
+  .sw .chipx{height:76px;}
+  .sw .meta{padding:12px 14px;}
+  .sw .nm{font-family:Oswald,sans-serif; font-weight:500; text-transform:uppercase;
+          font-size:13px; letter-spacing:.06em;}
+  .sw .hx{font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--ink-3); margin-top:2px;}
+  .sw .use{font-size:12.5px; color:var(--ink-2); margin-top:7px; line-height:1.45;}
+
+  /* type specimens */
+  .spec{background:var(--card); border:1px solid var(--rule); border-radius:10px;
+        box-shadow:var(--shadow); padding:22px; margin-top:16px;
+        display:flex; flex-direction:column; gap:22px;}
+  .row{display:flex; flex-wrap:wrap; gap:6px 18px; align-items:baseline;
+       border-bottom:1px solid var(--rule-2); padding-bottom:18px;}
+  .row:last-child{border-bottom:0; padding-bottom:0;}
+  .row .sample{flex:1 1 320px; min-width:0; color:var(--ink);}
+  .row .facts{flex:0 0 190px; font-family:"IBM Plex Mono",monospace; font-size:11.5px;
+              color:var(--ink-3); line-height:1.7;}
+
+  /* component demo */
+  .demo{background:var(--card); border:1px solid var(--rule); border-radius:10px;
+        box-shadow:var(--shadow); padding:24px; margin-top:16px;}
+  .btnrow{display:flex; flex-wrap:wrap; gap:14px; align-items:center;}
+  .b{font-family:Oswald,sans-serif; font-weight:500; text-transform:uppercase;
+     letter-spacing:.08em; font-size:14px; padding:14px 28px; border:2px solid transparent;
+     border-radius:2px; cursor:pointer; display:inline-block; text-decoration:none;}
+  .b-primary{background:#F17825; color:#110F2D;}
+  .b-secondary{background:#241E70; color:#fff;}
+  .b-ghost{background:transparent; color:#241E70; border-color:#241E70;}
+  :root:not([data-theme="light"]) .b-ghost{color:#9A93E8; border-color:#9A93E8;}
+  @media (prefers-color-scheme: light){:root:not([data-theme="dark"]) .b-ghost{color:#241E70; border-color:#241E70;}}
+  .note{font-size:13px; color:var(--ink-3); margin-top:14px;}
+
+  .countdemo{display:grid; grid-template-columns:repeat(4,1fr); gap:2px; max-width:440px; margin-top:8px;}
+  .cd{background:#241E70; color:#fff; text-align:center; padding:16px 6px;}
+  .cd:nth-child(2){background:#2E2782;} .cd:nth-child(3){background:#383094;} .cd:nth-child(4){background:#F17825; color:#110F2D;}
+  .cd b{font-family:Oswald,sans-serif; font-size:30px; font-weight:700; display:block; line-height:1;
+        font-variant-numeric:tabular-nums;}
+  .cd span{font-family:Oswald,sans-serif; font-size:10px; letter-spacing:.16em; text-transform:uppercase; opacity:.85;}
+
+  /* retire list */
+  .retire{display:flex; flex-wrap:wrap; gap:10px; margin-top:16px;}
+  .old{display:flex; align-items:center; gap:8px; background:var(--bad-bg); color:var(--bad);
+       border-radius:99px; padding:6px 14px 6px 6px; font-family:"IBM Plex Mono",monospace; font-size:12px;}
+  .old i{width:20px; height:20px; border-radius:50%; display:block; flex:0 0 auto;
+         border:1px solid rgba(0,0,0,.15);}
+
+  table{width:100%; border-collapse:collapse; margin-top:16px; font-size:14.5px;}
+  th,td{text-align:left; padding:11px 12px; border-bottom:1px solid var(--rule-2); vertical-align:top;}
+  th{font-family:Oswald,sans-serif; font-weight:500; text-transform:uppercase; font-size:11.5px;
+     letter-spacing:.1em; color:var(--ink-3); border-bottom:1px solid var(--rule);}
+  td.m{font-family:"IBM Plex Mono",monospace; font-size:12.5px; white-space:nowrap;}
+  .tw{overflow-x:auto;}
+
+  ul.pts{margin:14px 0 0; padding-left:20px; display:grid; gap:9px; color:var(--ink-2); font-size:15px;}
+  ul.pts b{color:var(--ink); font-weight:600;}
+
+  .flag{background:var(--bad-bg); border-left:3px solid var(--bad); border-radius:0 8px 8px 0;
+        padding:16px 18px; margin-top:16px; font-size:14.5px; color:var(--ink-2);}
+  .flag b{color:var(--bad); font-weight:600;}
+
+  .logobox{display:flex; flex-wrap:wrap; gap:24px; align-items:center; margin-top:16px;
+           background:var(--card); border:1px solid var(--rule); border-radius:10px;
+           box-shadow:var(--shadow); padding:24px;}
+  .logobox img{width:196px; height:auto; border:1px dashed var(--rule); background:#fff;}
+
+  footer{margin-top:60px; padding-top:22px; border-top:4px solid var(--brand);
+         font-size:13px; color:var(--ink-3); display:flex; flex-wrap:wrap; gap:12px;
+         justify-content:space-between;}
+  @media(max-width:560px){
+    .row .facts{flex:1 1 100%;}
+    .countdemo{grid-template-columns:repeat(2,1fr);}
+  }
+</style>
+
+<div class="wrap">
+
+<header class="mast">
+  <div class="eyebrow">Print 2 Pack · Saudi Arabia</div>
+  <h1>Design<br>System</h1>
+  <p>Sampled from the live site on 22 September 2026, for the rebuild. Every value below
+  is measured from <span class="mono">print2pack-saudi.com</span>, not invented — then
+  reduced to a set the site can actually be built from.</p>
+</header>
+
+<h2>What is there today</h2>
+<p class="lede">The site currently uses <b>eleven</b> brand-ish colours with no system
+behind them: three purples, four oranges and yellows, two greens and a pink.</p>
+
+<div class="retire">
+  <span class="old"><i style="background:#554bb9"></i>#554BB9</span>
+  <span class="old"><i style="background:#483fa1"></i>#483FA1</span>
+  <span class="old"><i style="background:#8478fd"></i>#8478FD</span>
+  <span class="old"><i style="background:#f47920"></i>#F47920</span>
+  <span class="old"><i style="background:#ff8a00"></i>#FF8A00</span>
+  <span class="old"><i style="background:#fac400"></i>#FAC400</span>
+  <span class="old"><i style="background:#efa506"></i>#EFA506</span>
+  <span class="old"><i style="background:#167908"></i>#167908</span>
+  <span class="old"><i style="background:#1d5629"></i>#1D5629</span>
+  <span class="old"><i style="background:#ec398b"></i>#EC398B</span>
+  <span class="old"><i style="background:#00acee"></i>#00ACEE</span>
+</div>
+
+<div class="flag">
+  <b>The Visitor Registration button is pink (#EC398B).</b> It appears nowhere else on the
+  site and nowhere in the logo. One of the two most important buttons on the page is a
+  colour the brand does not own.
+</div>
+
+<h2>The logo</h2>
+
+<div class="logobox">
+  <img src="data:image/jpeg;base64,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" alt="Current Print 2 Pack Saudi Arabia logo">
+  <div style="flex:1 1 300px; min-width:0;">
+    <table>
+      <tr><th>Attribute</th><th>Current</th></tr>
+      <tr><td>File format</td><td class="m">JPEG — no transparency</td></tr>
+      <tr><td>Source size</td><td class="m">196 × 130 px</td></tr>
+      <tr><td>Displayed at</td><td class="m">100 × 66 px</td></tr>
+      <tr><td>Dominant colour</td><td class="m">#241E70</td></tr>
+      <tr><td>Accent colour</td><td class="m">#F17825</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="flag">
+  <b>The logo is a JPEG.</b> That means no transparent background, visible compression
+  fringing around the letterforms, and a hard ceiling on size — it cannot be printed on a
+  banner or shown on a retina screen without blurring. <b>Ask the client for the original
+  vector file. If it no longer exists, redrawing it as SVG is a half-day of work and
+  should be part of the rebuild quote.</b>
+</div>
+
+<h3>Rules once a proper file exists</h3>
+<ul class="pts">
+  <li><b>Clear space:</b> keep the height of the "P" free on every side.</li>
+  <li><b>Minimum width:</b> 120 px on screen, 25 mm in print.</li>
+  <li><b>On dark grounds:</b> a white-and-orange version. Never the indigo logo on navy.</li>
+  <li><b>Never</b> stretch, recolour, add effects, or place it on a busy photograph without
+  a solid plate behind it.</li>
+</ul>
+
+<h2>Colour</h2>
+<p class="lede"><b>Two brand colours, both taken from the logo. Every neutral is the same
+indigo at a different lightness. Nothing else.</b> Decided 2026-09-22 — the Saudi green
+from the first draft is gone too: the national context on this site lives in the
+photography, not in a swatch.</p>
+
+<h3>The brand</h3>
+<div class="swatches">
+  <div class="sw"><div class="chipx" style="background:#241E70"></div><div class="meta">
+    <div class="nm">Indigo</div><div class="hx">#241E70</div>
+    <div class="use">Primary. Headers, footers, section grounds, secondary buttons. Straight from the logo.</div></div></div>
+
+  <div class="sw"><div class="chipx" style="background:#F17825"></div><div class="meta">
+    <div class="nm">Orange</div><div class="hx">#F17825</div>
+    <div class="use">Accent, and the only call-to-action colour. Straight from the logo. <b>A fill, never a text colour.</b></div></div></div>
+</div>
+
+<h3>Derived — the same indigo, lighter and darker</h3>
+<div class="swatches">
+  <div class="sw"><div class="chipx" style="background:#110F2D"></div><div class="meta">
+    <div class="nm">Ink</div><div class="hx">#110F2D</div>
+    <div class="use">All body text and headings. 18.6:1 on white.</div></div></div>
+
+  <div class="sw"><div class="chipx" style="background:#201C53"></div><div class="meta">
+    <div class="nm">Indigo Deep</div><div class="hx">#201C53</div>
+    <div class="use">Footer, dark sections, overlays on photography.</div></div></div>
+
+  <div class="sw"><div class="chipx" style="background:#322C81"></div><div class="meta">
+    <div class="nm">Indigo Light</div><div class="hx">#322C81</div>
+    <div class="use">Hover states on indigo, second tier of a stacked surface.</div></div></div>
+
+  <div class="sw"><div class="chipx" style="background:#5C53C4"></div><div class="meta">
+    <div class="nm">Indigo Muted</div><div class="hx">#5C53C4</div>
+    <div class="use">Secondary text on dark grounds, quiet icons, chart fills.</div></div></div>
+
+  <div class="sw"><div class="chipx" style="background:#B6B2E5"></div><div class="meta">
+    <div class="nm">Indigo Pale</div><div class="hx">#B6B2E5</div>
+    <div class="use">Borders, dividers, disabled controls.</div></div></div>
+
+  <div class="sw"><div class="chipx" style="background:#E5E4F5; border-bottom:1px solid #DFDFEA"></div><div class="meta">
+    <div class="nm">Indigo Tint</div><div class="hx">#E5E4F5</div>
+    <div class="use">Table stripes, quiet panels, the page ground.</div></div></div>
+</div>
+
+<h3>States — the one exception</h3>
+<p class="lede">A form that fails needs a red. That is usability, not branding. <b>These
+appear only inside error, warning and success messages — never as decoration, never as a
+button.</b></p>
+<div class="swatches">
+  <div class="sw"><div class="chipx" style="background:#B3261E"></div><div class="meta">
+    <div class="nm">Error</div><div class="hx">#B3261E</div>
+    <div class="use">Failed validation, broken submission.</div></div></div>
+  <div class="sw"><div class="chipx" style="background:#8A5A00"></div><div class="meta">
+    <div class="nm">Warning</div><div class="hx">#8A5A00</div>
+    <div class="use">Deadlines, incomplete forms.</div></div></div>
+  <div class="sw"><div class="chipx" style="background:#2E6B4F"></div><div class="meta">
+    <div class="nm">Success</div><div class="hx">#2E6B4F</div>
+    <div class="use">Booking confirmed, registration received.</div></div></div>
+</div>
+
+<h3>Contrast — measured, not assumed</h3>
+<div class="tw">
+<table>
+  <tr><th>Combination</th><th>Ratio</th><th>Verdict</th></tr>
+  <tr><td>Ink <span class="mono">#110F2D</span> on paper</td><td class="m">18.6:1</td><td>AAA</td></tr>
+  <tr><td>White on indigo <span class="mono">#241E70</span></td><td class="m">14.1:1</td><td>AAA</td></tr>
+  <tr><td><b>Ink on orange</b> <span class="mono">#F17825</span></td><td class="m">6.5:1</td><td><b>AA — use this</b></td></tr>
+  <tr><td style="color:var(--bad)"><b>White on orange</b></td><td class="m" style="color:var(--bad)">2.8:1</td><td style="color:var(--bad)"><b>FAILS at every size</b></td></tr>
+  <tr><td style="color:var(--bad)">Orange text on a light ground</td><td class="m" style="color:var(--bad)">2.6:1</td><td style="color:var(--bad)"><b>FAILS</b></td></tr>
+</table>
+</div>
+
+<div class="flag">
+  <b>The site's orange buttons use white text. That scores 2.8:1 and fails accessibility at
+  every size</b> — the floor for large text is 3:1 and for body text 4.5:1.<br><br>
+  <b>The fix keeps the logo orange exactly: put ink on it instead of white.</b> Same colour,
+  6.5:1, passes comfortably. Do not darken the orange — that would stop being the brand.
+</div>
+
+<h3>Rules</h3>
+<ul class="pts">
+  <li><b>If it is orange, it is clickable.</b> Nothing decorative in orange, or the buttons
+  stop reading as buttons.</li>
+  <li><b>Orange is a fill, never text.</b> Orange type on a light ground fails contrast at
+  any size. An orange link has to be a button.</li>
+  <li><b>Text on orange is ink, not white.</b></li>
+  <li><b>Every neutral is indigo.</b> If a grey is needed, take it from the ramp above —
+  never a generic grey, never a new hue.</li>
+  <li><b>One orange element per screen region.</b> Indigo carries structure; orange carries
+  the single thing you want pressed.</li>
+</ul>
+
+<h2>Type</h2>
+<p class="lede">The site already uses <b>Oswald</b> and <b>Poppins</b>, and both are good
+choices — Oswald's condensed capitals suit an industrial trade fair, Poppins reads cleanly
+at small sizes. Keep them. Fix how they are used.</p>
+
+<div class="spec">
+  <div class="row">
+    <div class="sample disp" style="font-size:52px; font-weight:700; text-transform:uppercase; line-height:1;">Print 2 Pack 2026</div>
+    <div class="facts">Oswald 700<br>52 / 52 px<br>uppercase<br>Page title — one per page</div>
+  </div>
+  <div class="row">
+    <div class="sample disp" style="font-size:34px; font-weight:700; text-transform:uppercase; line-height:1.1;">Book a Stand</div>
+    <div class="facts">Oswald 700<br>34 / 38 px<br>uppercase<br>Section heading</div>
+  </div>
+  <div class="row">
+    <div class="sample disp" style="font-size:20px; font-weight:500; text-transform:uppercase; letter-spacing:.06em;">Exhibitor Profile</div>
+    <div class="facts">Oswald 500<br>20 / 26 px<br>+0.06em<br>Sub-heading</div>
+  </div>
+  <div class="row">
+    <div class="sample" style="font-size:16px; font-weight:400; line-height:1.65; color:var(--ink-2);">
+      The inaugural trade fair for the paper, printing, packaging and plastic industries in
+      Saudi Arabia, at the Jeddah Center for Exhibitions and Events.</div>
+    <div class="facts">Poppins 400<br>16 / 26 px<br>max 70 characters<br>Body</div>
+  </div>
+  <div class="row">
+    <div class="sample" style="font-size:13px; font-weight:500; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3);">16–18 November 2026</div>
+    <div class="facts">Poppins 500<br>13 px<br>+0.14em uppercase<br>Label / eyebrow</div>
+  </div>
+</div>
+
+<div class="flag">
+  <b>Body text is currently 13.3px.</b> That is below the readable minimum on a phone and a
+  large part of why the site feels cramped. <b>Set the base to 16px.</b><br><br>
+  <b>And the site loads seven weights of Raleway that it never uses.</b> The stylesheet
+  requests <span class="mono">Oswald:400,700 | Raleway:300,400,400i,500,600,700,900</span>
+  while the CSS actually asks for Poppins. Every visitor downloads Raleway for nothing.
+  Load <b>Oswald 400/700 and Poppins 400/500/600</b>, and nothing else.
+</div>
+
+<h2>Components</h2>
+
+<div class="demo">
+  <h3 style="margin-top:0">Buttons</h3>
+  <div class="btnrow">
+    <span class="b b-primary">Book a Stand</span>
+    <span class="b b-secondary">Visitor Registration</span>
+    <span class="b b-ghost">Download Brochure</span>
+  </div>
+  <p class="note">Oswald 500, uppercase, +0.08em, 14px. Padding 14×28. Corner radius 2px —
+  square-ish, matching the logo's geometry. <b>Primary orange is reserved for the single
+  most important action on the page, and its text is ink, not white.</b> The current pink
+  button becomes indigo.</p>
+</div>
+
+<div class="demo">
+  <h3 style="margin-top:0">Countdown</h3>
+  <div class="countdemo">
+    <div class="cd"><b>55</b><span>Days</span></div>
+    <div class="cd"><b>14</b><span>Hours</span></div>
+    <div class="cd"><b>22</b><span>Min</span></div>
+    <div class="cd"><b>08</b><span>Sec</span></div>
+  </div>
+  <p class="note">Currently yellow, orange, blue and purple — four unrelated colours in one
+  component. <b>Replace with the indigo ramp, with the final cell in orange</b> so the
+  eye lands on the urgent end. Oswald 700 for digits, tabular figures so they stop jumping.</p>
+</div>
+
+<h2>Arabic and right-to-left</h2>
+<p class="lede">The site already ships <span class="mono">bootstrap-rtl.min.css</span> and
+<span class="mono">rtl.css</span>, so the foundation exists. The rebuild must keep it.</p>
+<ul class="pts">
+  <li><b>Oswald has no Arabic.</b> Pair it with a display Arabic face — <b>Cairo</b> or
+  <b>Tajawal</b> — at the same optical weight. Never let Arabic fall back to a system font
+  beside a styled Latin heading.</li>
+  <li><b>Arabic runs taller.</b> Add roughly 15% line-height in RTL and do not set Arabic
+  in all-caps or with letter-spacing — neither exists in Arabic typography.</li>
+  <li><b>Mirror the layout, not the logo.</b> Navigation, arrows and progress flip; the
+  logo and photographs do not.</li>
+  <li><b>Numbers and dates stay Western-Arabic</b> (16–18) for an international trade
+  audience, unless the client asks otherwise.</li>
+</ul>
+
+<h2>What to retire</h2>
+<div class="tw">
+<table>
+  <tr><th>Retire</th><th>Replace with</th><th>Why</th></tr>
+  <tr><td class="m">#EC398B pink</td><td class="m">#241E70 indigo</td><td>Not a brand colour; appears once, on a primary button</td></tr>
+  <tr><td class="m">#554BB9 · #483FA1 · #8478FD</td><td class="m">#241E70</td><td>Three drifted versions of the logo indigo</td></tr>
+  <tr><td class="m">#F47920 · #FF8A00 · #FAC400 · #EFA506</td><td class="m">#F17825</td><td>Four near-identical oranges and yellows</td></tr>
+  <tr><td class="m">#167908 · #1D5629 green</td><td class="m">nothing</td><td>Not in the logo. Saudi context belongs in the photography</td></tr>
+  <tr><td class="m">#00ACEE blue</td><td class="m">#241E70</td><td>A social-platform colour, not a brand colour</td></tr>
+  <tr><td class="m">White text on orange</td><td class="m">Ink on orange</td><td>2.8:1 — fails accessibility at every size</td></tr>
+  <tr><td class="m">Raleway, 7 weights</td><td class="m">nothing</td><td>Downloaded on every page and never used</td></tr>
+  <tr><td class="m">13.3px body text</td><td class="m">16px</td><td>Below the readable minimum on phones</td></tr>
+  <tr><td class="m">Logo as JPEG</td><td class="m">SVG</td><td>No transparency, fringed edges, cannot scale</td></tr>
+</table>
+</div>
+
+<footer>
+  <span>Print 2 Pack Saudi Arabia — design system, v1</span>
+  <span>Sampled from the live site, 22 September 2026</span>
+</footer>
+
+</div>

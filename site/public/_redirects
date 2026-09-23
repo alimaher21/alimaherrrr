@@ -1,0 +1,55 @@
+# Old URLs -> new. Generated from extract.py's page map — do not hand-edit.
+# Losing these would throw away whatever search ranking the old site has.
+
+/m/about-print-2-pack    /about/    301
+/m/about-print-2-pack/   /about/    301
+/m/why-print-2-pack    /why/    301
+/m/why-print-2-pack/   /why/    301
+/m/fact-sheet    /fact-sheet/    301
+/m/fact-sheet/   /fact-sheet/    301
+/m/market-background    /market-background/    301
+/m/market-background/   /market-background/    301
+/m/the-facts-and-figure    /facts-and-figures/    301
+/m/the-facts-and-figure/   /facts-and-figures/    301
+/m/marketing-campaign    /marketing-campaign/    301
+/m/marketing-campaign/   /marketing-campaign/    301
+/m/show-venue    /venue/    301
+/m/show-venue/   /venue/    301
+/m/organizer    /organiser/    301
+/m/organizer/   /organiser/    301
+/m/exhibitors-profile    /exhibitors/    301
+/m/exhibitors-profile/   /exhibitors/    301
+/m/book-a-stand    /book-a-stand/    301
+/m/book-a-stand/   /book-a-stand/    301
+/m/booth-specification    /booth-specifications/    301
+/m/booth-specification/   /booth-specifications/    301
+/m/accommodation    /accommodation/    301
+/m/accommodation/   /accommodation/    301
+/m/logistics-&-shipment    /logistics/    301
+/m/logistics-&-shipment/   /logistics/    301
+/m/exhibitors-logo    /exhibitor-logos/    301
+/m/exhibitors-logo/   /exhibitor-logos/    301
+/m/exhibitor-list-2025    /exhibitor-list/    301
+/m/exhibitor-list-2025/   /exhibitor-list/    301
+/m/visitors-profile    /visitors/    301
+/m/visitors-profile/   /visitors/    301
+/m/brochure    /brochure/    301
+/m/brochure/   /brochure/    301
+/m/post-show-report    /post-show-report/    301
+/m/post-show-report/   /post-show-report/    301
+/m/media-partners    /media-partners/    301
+/m/media-partners/   /media-partners/    301
+/m/gallery    /gallery/    301
+/m/gallery/   /gallery/    301
+/m/be-our-partner    /partner/    301
+/m/be-our-partner/   /partner/    301
+/m/contact-us    /contact/    301
+/m/contact-us/   /contact/    301
+
+# language switch and duplicate galleries
+/lang/ar          /ar/        301
+/show-gallery/*   /gallery/   301
+/m/privacy-policy /privacy/   301
+
+# anything else under the old /m/ prefix
+/m/*  /  301

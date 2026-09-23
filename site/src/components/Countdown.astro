@@ -1,0 +1,59 @@
+---
+import { event } from '../data/site.js';
+const { labels } = Astro.props;
+const target = `${event.startISO}T09:00:00+03:00`;
+---
+<div class="cd" data-target={target} role="timer" aria-live="off">
+  <div class="cd__cell"><b data-unit="days">—</b><span>{labels.days}</span></div>
+  <div class="cd__cell"><b data-unit="hours">—</b><span>{labels.hours}</span></div>
+  <div class="cd__cell"><b data-unit="minutes">—</b><span>{labels.minutes}</span></div>
+  <div class="cd__cell cd__cell--last"><b data-unit="seconds">—</b><span>{labels.seconds}</span></div>
+</div>
+
+<style>
+  .cd { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; max-width: 460px; }
+  .cd__cell { background: var(--indigo-deep); color: var(--white); text-align: center; padding: var(--s4) var(--s2); }
+  .cd__cell:nth-child(2) { background: #2A2468; }
+  .cd__cell:nth-child(3) { background: var(--indigo-light); }
+  /* the last cell is the urgent one — orange, with ink text, never white */
+  .cd__cell--last { background: var(--orange); color: var(--ink); }
+  .cd b {
+    display: block;
+    font-family: var(--display);
+    font-size: clamp(1.75rem, 5vw, 2.5rem);
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .cd span {
+    font-size: .6875rem;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    opacity: .88;
+  }
+  [dir='rtl'] .cd span { letter-spacing: normal; text-transform: none; }
+</style>
+
+<script>
+  const box = document.querySelector('.cd');
+  if (box) {
+    const target = new Date(box.dataset.target).getTime();
+    const cells = {
+      days: box.querySelector('[data-unit="days"]'),
+      hours: box.querySelector('[data-unit="hours"]'),
+      minutes: box.querySelector('[data-unit="minutes"]'),
+      seconds: box.querySelector('[data-unit="seconds"]'),
+    };
+    const pad = (n) => String(n).padStart(2, '0');
+    const tick = () => {
+      const left = Math.max(0, target - Date.now());
+      const s = Math.floor(left / 1000);
+      cells.days.textContent = Math.floor(s / 86400);
+      cells.hours.textContent = pad(Math.floor(s / 3600) % 24);
+      cells.minutes.textContent = pad(Math.floor(s / 60) % 60);
+      cells.seconds.textContent = pad(s % 60);
+    };
+    tick();
+    setInterval(tick, 1000);
+  }
+</script>

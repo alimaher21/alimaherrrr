@@ -1,0 +1,233 @@
+---
+import { consent, validation, forms } from '../data/forms.js';
+import { url } from '../data/site.js';
+
+const { kind, lang } = Astro.props;
+const def = forms[kind];
+const c = def[lang] ?? def.en;
+const v = validation[lang] ?? validation.en;
+const con = consent[lang] ?? consent.en;
+const id = `form-${kind}`;
+---
+<div class="formwrap">
+  <p class="formintro">{c.intro}</p>
+
+  <form id={id} class="form" method="post" action={def.endpoint} novalidate>
+    <!-- Honeypot: real people never see this, bots fill it in. -->
+    <div class="hp" aria-hidden="true">
+      <label for={`${id}-website2`}>Leave this empty</label>
+      <input id={`${id}-website2`} name="website2" type="text" tabindex="-1" autocomplete="off" />
+    </div>
+    <input type="hidden" name="lang" value={lang} />
+    <input type="hidden" name="form" value={kind} />
+
+    <div class="fields">
+      {c.fields.map((f) => (
+        <p class={f.type === 'textarea' ? 'field field--wide' : 'field'}>
+          <label for={`${id}-${f.name}`}>
+            {f.label}{f.required && <abbr title={v.required} aria-hidden="true">*</abbr>}
+          </label>
+
+          {f.type === 'select' ? (
+            <select id={`${id}-${f.name}`} name={f.name} required={f.required}
+                    autocomplete={f.autocomplete}>
+              <option value="">—</option>
+              {f.options.map((o) => <option value={o}>{o}</option>)}
+            </select>
+          ) : f.type === 'textarea' ? (
+            <textarea id={`${id}-${f.name}`} name={f.name} rows={f.rows ?? 4}
+                      required={f.required}></textarea>
+          ) : (
+            <input id={`${id}-${f.name}`} name={f.name} type={f.type}
+                   required={f.required} autocomplete={f.autocomplete}
+                   inputmode={f.type === 'tel' ? 'tel' : undefined} />
+          )}
+
+          {f.hint && <span class="hint">{f.hint}</span>}
+          <span class="err" id={`${id}-${f.name}-err`} role="alert"></span>
+        </p>
+      ))}
+    </div>
+
+    <p class="consent">
+      <input id={`${id}-consent`} name="consent" type="checkbox" required />
+      <label for={`${id}-consent`}>
+        {con.label} <a href={url(lang, 'privacy/')}>{con.link}</a>
+      </label>
+      <span class="err" id={`${id}-consent-err`} role="alert"></span>
+    </p>
+
+    <button class="btn btn--primary" type="submit" data-label={c.submit} data-sending={c.sending}>
+      {c.submit}
+    </button>
+
+    <div class="result" role="status" aria-live="polite" hidden
+         data-ok-title={c.successTitle} data-ok-body={c.successBody}
+         data-err-title={c.errorTitle} data-err-body={c.errorBody}></div>
+  </form>
+</div>
+
+<script
+  is:inline
+  define:vars={{ id, messages: validation[Astro.props.lang] ?? validation.en }}
+>
+  (() => {
+    const form = document.getElementById(id);
+    if (!form) return;
+    const button = form.querySelector('button[type=submit]');
+    const result = form.querySelector('.result');
+
+    const problem = (el) => {
+      if (el.type === 'checkbox') return el.checked ? '' : messages.required;
+      const value = el.value.trim();
+      if (el.required && !value) return messages.required;
+      if (!value) return '';
+      if (el.type === 'email') return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value) ? '' : messages.email;
+      if (el.type === 'tel') return /^[+]?[\d\s()-]{7,}$/.test(value) ? '' : messages.phone;
+      if (el.type === 'url') return /^https?:\/\/.+\..+/.test(value) ? '' : messages.url;
+      return '';
+    };
+
+    const show = (el, msg) => {
+      const slot = document.getElementById(`${el.id}-err`);
+      if (slot) slot.textContent = msg;
+      el.setAttribute('aria-invalid', msg ? 'true' : 'false');
+      el.closest('.field, .consent')?.classList.toggle('is-bad', Boolean(msg));
+    };
+
+    form.querySelectorAll('input, select, textarea').forEach((el) => {
+      if (el.name === 'website2') return;
+      el.addEventListener('blur', () => show(el, problem(el)));
+      el.addEventListener('input', () => {
+        if (el.getAttribute('aria-invalid') === 'true') show(el, problem(el));
+      });
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      let first = null;
+      form.querySelectorAll('input, select, textarea').forEach((el) => {
+        if (el.name === 'website2') return;
+        const msg = problem(el);
+        show(el, msg);
+        if (msg && !first) first = el;
+      });
+      if (first) { first.focus(); return; }
+
+      button.disabled = true;
+      button.textContent = button.dataset.sending;
+      result.hidden = true;
+
+      try {
+        const res = await fetch(form.action, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify(Object.fromEntries(new FormData(form))),
+        });
+        if (!res.ok) throw new Error(String(res.status));
+
+        result.className = 'result result--ok';
+        result.innerHTML =
+          `<strong>${result.dataset.okTitle}</strong><span>${result.dataset.okBody}</span>`;
+        result.hidden = false;
+        form.querySelector('.fields').hidden = true;
+        form.querySelector('.consent').hidden = true;
+        button.hidden = true;
+        result.focus?.();
+      } catch (err) {
+        result.className = 'result result--err';
+        result.innerHTML =
+          `<strong>${result.dataset.errTitle}</strong><span>${result.dataset.errBody}</span>`;
+        result.hidden = false;
+        button.disabled = false;
+        button.textContent = button.dataset.label;
+      }
+    });
+  })();
+</script>
+
+<style>
+  .formwrap { margin-block-start: var(--s5); max-width: 760px; }
+  .formintro { font-size: var(--step-1); color: var(--indigo-deep); margin-block-end: var(--s6); }
+
+  .hp { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+
+  .fields {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: var(--s4) var(--s5);
+  }
+  .field { margin: 0; display: flex; flex-direction: column; gap: .35rem; }
+  .field--wide { grid-column: 1 / -1; }
+
+  label {
+    font-family: var(--display);
+    font-size: .75rem;
+    font-weight: 500;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--indigo-muted);
+  }
+  [dir='rtl'] label { letter-spacing: normal; text-transform: none; font-size: .875rem; }
+  abbr { color: var(--orange); text-decoration: none; margin-inline-start: 2px; }
+
+  input, select, textarea {
+    font: inherit;
+    font-size: 1rem;
+    color: var(--ink);
+    background: var(--white);
+    border: 1px solid var(--indigo-pale);
+    border-radius: var(--radius);
+    padding: .7rem .8rem;
+    width: 100%;
+    min-height: 44px;                 /* comfortable tap target */
+  }
+  textarea { min-height: 7rem; resize: vertical; }
+  input:focus-visible, select:focus-visible, textarea:focus-visible {
+    outline: 3px solid var(--orange);
+    outline-offset: 1px;
+    border-color: var(--indigo);
+  }
+  .is-bad input, .is-bad select, .is-bad textarea { border-color: var(--error); }
+
+  .hint { font-size: .8125rem; color: var(--indigo-muted); }
+  .err { font-size: .8125rem; color: var(--error); min-height: 0; }
+  .err:empty { display: none; }
+
+  .consent {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: .6rem;
+    align-items: start;
+    margin-block: var(--s6) var(--s5);
+    padding: var(--s4);
+    background: var(--indigo-tint);
+    border-radius: var(--radius);
+  }
+  .consent input { width: 20px; height: 20px; min-height: 0; margin-block-start: 2px; }
+  .consent label {
+    font-family: var(--body);
+    font-size: .9375rem;
+    letter-spacing: normal;
+    text-transform: none;
+    color: var(--indigo-deep);
+    font-weight: 400;
+  }
+  .consent .err { grid-column: 2; }
+
+  .result {
+    margin-block-start: var(--s5);
+    padding: var(--s5);
+    border-inline-start: 4px solid var(--success);
+    background: var(--white);
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+  }
+  .result strong { font-family: var(--display); font-size: var(--step-1); color: var(--success); }
+  [dir='rtl'] .result strong { font-size: 1.15rem; }
+  .result--err { border-inline-start-color: var(--error); }
+  .result--err strong { color: var(--error); }
+  .result span { color: var(--indigo-deep); }
+</style>

@@ -1,0 +1,36 @@
+---
+import Page from '../../layouts/Page.astro';
+import Blocks from '../../components/Blocks.astro';
+import Form from '../../components/Form.astro';
+import { pages, slugs } from '../../data/pages.js';
+import content from '../../data/content.json';
+
+export function getStaticPaths() {
+  return slugs.map((slug) => ({ params: { slug }, props: { slug } }));
+}
+
+const { slug } = Astro.props;
+const page = pages[slug];
+const blocks = content[slug]?.ar ?? [];
+
+// Two pages are forms, not prose.
+const FORM = { register: 'register', 'book-a-stand': 'stand' };
+---
+<Page page={page} lang="ar" slug={slug}>
+  {FORM[slug]
+    ? <Form kind={FORM[slug]} lang="ar" />
+    : blocks.length > 0
+      ? <Blocks blocks={blocks} />
+      : <p class="todo">لا يوجد محتوى نصي لهذه الصفحة على الموقع الحالي — تحتاج إلى كتابة.</p>}
+</Page>
+
+<style>
+  .todo {
+    margin-block-start: var(--s5);
+    padding: var(--s4);
+    border-inline-start: 3px solid var(--warning);
+    background: #FBF3E4;
+    color: var(--warning);
+    font-size: 0.9375rem;
+  }
+</style>

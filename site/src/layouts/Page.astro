@@ -1,0 +1,136 @@
+---
+import Base from './Base.astro';
+import VenueMap from '../components/VenueMap.astro';
+import { nav, event, cta, url } from '../data/site.js';
+
+const { page, lang, slug } = Astro.props;
+const c = page[lang] ?? page.en;
+const items = nav[lang] ?? nav.en;
+const ar = lang === 'ar';
+
+const parent = items.find((i) => i.children?.some((ch) => ch.href === url(lang, slug + '/')));
+
+// Pages where a map earns its place.
+const WITH_MAP = ['venue', 'accommodation', 'contact'];
+
+const t = ar
+  ? { home: 'الرئيسية', crumb: 'مسار التنقل', facts: 'باختصار', when: 'التاريخ',
+      where: 'المكان', sheet: 'معلومات المعرض', ctaTitle: 'شارك في النسخة الأولى',
+      ctaText: 'حجز الأجنحة مفتوح الآن لدورة نوفمبر ٢٠٢٦.' }
+  : { home: 'Home', crumb: 'Breadcrumb', facts: 'At a glance', when: 'When',
+      where: 'Where', sheet: 'Fact sheet', ctaTitle: 'Take part in the first edition',
+      ctaText: 'Stand space is booking now for November 2026.' };
+---
+<Base title={c.title} description={c.description} lang={lang}>
+  <div class="phead">
+    <div class="wrap">
+      <nav class="crumbs" aria-label={t.crumb}>
+        <a href={url(lang)}>{t.home}</a>
+        {parent && <><span aria-hidden="true">›</span><span>{parent.label}</span></>}
+      </nav>
+      <h1>{c.h1}</h1>
+    </div>
+  </div>
+
+  <div class:list={['wrap', 'pgrid', { 'pgrid--about': slug === 'about' }]}>
+    <div class="pmain">
+      {slug !== 'about' && <p class="lead">{c.intro}</p>}
+      <slot />
+      {WITH_MAP.includes(slug) && <div class="pmap"><VenueMap lang={lang} /></div>}
+    </div>
+
+    {slug !== 'about' && <aside class="prail">
+      <h2>{t.facts}</h2>
+      <dl>
+        <dt>{t.when}</dt><dd>{event.dates[lang] ?? event.dates.en}</dd>
+        <dt>{t.where}</dt><dd>{event.venue[lang] ?? event.venue.en}</dd>
+      </dl>
+      <a class="prail__link" href={url(lang, 'fact-sheet/')}>{t.sheet} ›</a>
+      <div class="prail__cta">
+        <a class="btn btn--primary" href={url(lang, 'book-a-stand/')}>{cta[lang].stand}</a>
+        <a class="btn btn--ghost" href={url(lang, 'register/')}>{cta[lang].visit}</a>
+      </div>
+    </aside>}
+  </div>
+
+  <section class="pcta">
+    <div class="wrap pcta__inner">
+      <div>
+        <h2>{t.ctaTitle}</h2>
+        <p>{t.ctaText}</p>
+      </div>
+      <a class="btn btn--primary" href={url(lang, 'book-a-stand/')}>{cta[lang].stand}</a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .phead { background: var(--indigo); color: var(--white); padding-block: var(--s7) var(--s6); }
+  .crumbs {
+    display: flex; flex-wrap: wrap; gap: var(--s2);
+    font-size: .8125rem; color: var(--indigo-pale); margin-block-end: var(--s3);
+  }
+  .crumbs a { color: var(--indigo-pale); text-decoration: none; }
+  .crumbs a:hover { color: var(--white); text-decoration: underline; }
+
+  .pgrid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 280px;
+    gap: var(--s7);
+    padding-block: var(--s7) 0;
+    align-items: start;
+  }
+  .pmain { min-width: 0; }
+  .pgrid--about { display: block; }
+
+  /* The opening statement, set apart from the body so a page never begins as a wall. */
+  .lead {
+    font-size: var(--step-1);
+    line-height: 1.55;
+    color: var(--indigo-deep);
+    padding-inline-start: var(--s5);
+    border-inline-start: 3px solid var(--orange);
+    margin-block-end: var(--s6);
+  }
+  .pmap { margin-block-start: var(--s7); }
+
+  .prail {
+    position: sticky;
+    top: calc(78px + var(--s4));
+    background: var(--white);
+    border: 1px solid var(--indigo-pale);
+    padding: var(--s5);
+  }
+  .prail h2 {
+    font-size: .8125rem; letter-spacing: .14em; color: var(--indigo-muted);
+    margin-block-end: var(--s4);
+  }
+  [dir='rtl'] .prail h2 { letter-spacing: normal; }
+  .prail dl { margin: 0 0 var(--s4); display: grid; gap: var(--s3); }
+  .prail dt {
+    font-family: var(--display); font-size: .6875rem; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--indigo-muted);
+  }
+  [dir='rtl'] .prail dt { letter-spacing: normal; text-transform: none; }
+  .prail dd { margin: .15rem 0 0; font-size: .9375rem; color: var(--ink); font-weight: 500; }
+  .prail__link {
+    display: inline-block; font-size: .875rem; font-weight: 500;
+    margin-block-end: var(--s5); text-decoration: none;
+  }
+  .prail__link:hover { text-decoration: underline; }
+  .prail__cta { display: grid; gap: var(--s3); }
+  .prail__cta .btn { text-align: center; }
+
+  .pcta { background: var(--indigo-deep); color: var(--white); margin-block-start: var(--s9); }
+  .pcta__inner {
+    display: flex; flex-wrap: wrap; gap: var(--s5);
+    align-items: center; justify-content: space-between; padding-block: var(--s7);
+  }
+  .pcta h2 { margin-block-end: var(--s2); }
+  .pcta p { color: var(--indigo-pale); margin: 0; }
+
+  @media (max-width: 980px) {
+    .pgrid { grid-template-columns: 1fr; gap: var(--s6); }
+    .prail { position: static; }
+  }
+</style>

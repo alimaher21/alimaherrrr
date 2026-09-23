@@ -1,0 +1,28 @@
+---
+import Base from '../layouts/Base.astro';
+import { url } from '../data/site.js';
+---
+<Base title="Page not found — PRINT2PACK Saudi Arabia" description="That page does not exist. Find the show dates, book a stand or register to visit." lang="en">
+  <section class="notfound">
+    <div class="wrap">
+      <p class="eyebrow">404</p>
+      <h1>That page has moved on</h1>
+      <p class="lede">The page you were looking for is not here. These are the ones people usually want.</p>
+      <ul>
+        <li><a href={url('en')}>Home</a></li>
+        <li><a href={url('en', 'book-a-stand/')}>Book a Stand</a></li>
+        <li><a href={url('en', 'register/')}>Register to Visit</a></li>
+        <li><a href={url('en', 'fact-sheet/')}>Fact Sheet</a></li>
+        <li><a href={url('en', 'contact/')}>Contact</a></li>
+      </ul>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .notfound { padding-block: var(--s9) var(--s8); }
+  .notfound h1 { margin-block: var(--s3) var(--s4); }
+  .lede { font-size: var(--step-1); color: var(--indigo-deep); }
+  .notfound ul { list-style: none; padding: 0; margin-block-start: var(--s5); display: grid; gap: var(--s3); }
+  .notfound li a { font-family: var(--display); text-transform: uppercase; letter-spacing: .06em; font-size: 1.05rem; }
+</style>

@@ -1,0 +1,109 @@
+---
+import VenueMap from './VenueMap.astro';
+import { event, nav, locales, cta, url } from '../data/site.js';
+
+const { lang = 'en' } = Astro.props;
+const items = (nav[lang] ?? nav.en).filter((i) => i.children).slice(0, 3);
+const t = lang === 'ar'
+  ? { rights: 'جميع الحقوق محفوظة.', privacy: 'سياسة الخصوصية', contact: 'تواصل معنا' }
+  : { rights: 'All rights reserved.', privacy: 'Privacy', contact: 'Contact' };
+---
+<!-- The map is its own band. It used to sit inside the footer, lifted with a transform;
+     that left a dead gap and made the footer 1,680px tall. -->
+<section class="mapband">
+  <div class="wrap"><VenueMap lang={lang} compact={true} /></div>
+</section>
+
+<footer class="ft">
+  <div class="wrap ft__cols">
+    <div class="ft__brand">
+      <p class="eyebrow">{event.name} {event.edition}</p>
+      <p class="ft__dates">{event.dates[lang] ?? event.dates.en}</p>
+      <p class="ft__contact">
+        <a href={`mailto:${event.email}`}>{event.email}</a><br />
+        <a href={`https://wa.me/${event.whatsapp.replace('+', '')}`}>{event.whatsapp}</a>
+      </p>
+      <a class="btn btn--primary" href={url(lang, 'book-a-stand/')}>{cta[lang].stand}</a>
+    </div>
+
+    <div class="ft__links">
+      {items.map((col) => (
+        <nav class="ft__col" aria-label={col.label}>
+          <h3>{col.label}</h3>
+          <ul>{col.children.slice(0, 4).map((c) => <li><a href={c.href}>{c.label}</a></li>)}</ul>
+        </nav>
+      ))}
+    </div>
+  </div>
+
+  <div class="wrap ft__base">
+    <p>&copy; {new Date().getFullYear()} {event.organiser}. {t.rights}</p>
+    <p class="ft__baselinks">
+      <a href={url(lang, 'privacy/')}>{t.privacy}</a>
+      <a href={url(lang, 'contact/')}>{t.contact}</a>
+      <a href={locales[locales[lang].other].href}>{locales[lang].otherLabel}</a>
+    </p>
+  </div>
+</footer>
+
+<style>
+  .mapband { background: var(--indigo-tint); padding-block: var(--s7); }
+
+  .ft { background: var(--indigo-deep); color: var(--indigo-pale); }
+
+  .ft__cols {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s7) var(--s6);
+    padding-block: var(--s7) var(--s6);
+  }
+  .ft__brand { flex: 1 1 260px; max-width: 340px; }
+  .ft__links {
+    flex: 2 1 480px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--s5);
+  }
+
+  .ft__dates {
+    font-family: var(--display);
+    font-size: 1.5rem;
+    color: var(--white);
+    margin: var(--s2) 0 var(--s4);
+  }
+  [dir='rtl'] .ft__dates { font-size: 1.3rem; }
+  .ft__contact { font-size: .9375rem; line-height: 1.8; margin-block-end: var(--s5); }
+  .ft__contact a { color: var(--indigo-pale); }
+  .ft__contact a:hover { color: var(--white); }
+
+  .ft__col h3 {
+    color: var(--white); font-size: .75rem; letter-spacing: .14em;
+    margin-block-end: var(--s3); padding-block-end: var(--s2);
+    border-block-end: 2px solid var(--orange);
+  }
+  [dir='rtl'] .ft__col h3 { letter-spacing: normal; font-size: .875rem; }
+  .ft__col ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .45rem; }
+  .ft__col a { color: var(--indigo-pale); text-decoration: none; font-size: .875rem; }
+  .ft__col a:hover { color: var(--white); text-decoration: underline; }
+
+  .ft__base {
+    display: flex; flex-wrap: wrap; gap: var(--s3) var(--s5);
+    justify-content: space-between; align-items: baseline;
+    border-block-start: 1px solid rgba(255,255,255,.14);
+    padding-block: var(--s4) var(--s6);
+    font-size: .8125rem;
+  }
+  .ft__base p { margin: 0; }
+  .ft__baselinks { display: flex; flex-wrap: wrap; gap: var(--s5); }
+  .ft__base a { color: var(--indigo-pale); }
+  .ft__base a:hover { color: var(--white); }
+
+  /* Three link columns become two before they become one, so the footer never
+     turns into a single tall stack of eighteen links. */
+  @media (max-width: 860px) {
+    .ft__links { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s5) var(--s4); }
+  }
+  @media (max-width: 420px) {
+    .ft__links { grid-template-columns: 1fr; }
+  }
+</style>

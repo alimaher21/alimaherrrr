@@ -1,0 +1,177 @@
+---
+import { nav, locales, cta, event } from '../data/site.js';
+const { lang = 'en' } = Astro.props;
+const items = nav[lang] ?? nav.en;
+const other = locales[lang].other;
+const path = Astro.url.pathname;
+---
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="brand" href={lang === 'ar' ? '/ar/' : '/'}>
+      <span class="brand__mark" aria-hidden="true">P<span>2</span>P</span>
+      <span class="brand__text">
+        <strong>Print 2 Pack</strong>
+        <em>Saudi Arabia</em>
+      </span>
+    </a>
+
+    <button class="burger" aria-expanded="false" aria-controls="nav">
+      <span class="visually-hidden">Menu</span>
+      <span class="burger__bars" aria-hidden="true"></span>
+    </button>
+
+    <nav id="nav" class="nav" aria-label="Main">
+      <ul class="nav__list">
+        {items.map((item) => (
+          <li class={item.children ? 'has-children' : ''}>
+            <a href={item.href} aria-current={path === item.href ? 'page' : undefined}>{item.label}</a>
+            {item.children && (
+              <ul class="sub">
+                {item.children.map((c) => (
+                  <li><a href={c.href}>{c.label}</a></li>
+                ))}
+              </ul>
+            )}
+          </li>
+        ))}
+      </ul>
+
+      <div class="nav__actions">
+        <a class="lang" href={locales[other].href}>{locales[lang].otherLabel}</a>
+        <a class="btn btn--primary" href="/book-a-stand/">{cta[lang]?.stand ?? cta.en.stand}</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    background: var(--indigo);
+    color: var(--white);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .bar {
+    display: flex;
+    align-items: center;
+    gap: var(--s5);
+    min-height: 78px;
+  }
+
+  .brand { display: flex; align-items: center; gap: var(--s3); text-decoration: none; color: inherit; }
+  .brand__mark {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 1.75rem;
+    letter-spacing: -.04em;
+    line-height: 1;
+    background: var(--white);
+    color: var(--indigo);
+    padding: .3rem .5rem;
+    border-radius: var(--radius);
+  }
+  .brand__mark span { color: var(--orange); }
+  .brand__text { display: flex; flex-direction: column; line-height: 1.1; }
+  .brand__text strong { font-family: var(--display); font-size: 1.05rem; letter-spacing: .02em; text-transform: uppercase; }
+  .brand__text em { font-style: normal; font-size: .7rem; letter-spacing: .22em; text-transform: uppercase; color: var(--indigo-pale); }
+  [dir='rtl'] .brand__text em { letter-spacing: normal; }
+
+  .nav { margin-inline-start: auto; display: flex; align-items: center; gap: var(--s5); }
+  .nav__list { display: flex; gap: var(--s4); list-style: none; margin: 0; padding: 0; }
+  .nav__list > li { position: relative; }
+  .nav__list > li > a {
+    color: var(--white);
+    text-decoration: none;
+    font-size: .875rem;
+    font-weight: 500;
+    padding: .5rem 0;
+    display: inline-block;
+    border-block-end: 2px solid transparent;
+  }
+  .nav__list > li > a:hover,
+  .nav__list > li > a[aria-current='page'] { border-block-end-color: var(--orange); }
+
+  .sub {
+    position: absolute;
+    inset-inline-start: 0;
+    top: 100%;
+    background: var(--white);
+    min-width: 230px;
+    list-style: none;
+    margin: 0;
+    padding: var(--s2) 0;
+    box-shadow: 0 12px 30px -12px rgba(17,15,45,.5);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(6px);
+    transition: opacity .14s ease, transform .14s ease, visibility .14s;
+  }
+  .has-children:hover .sub,
+  .has-children:focus-within .sub { opacity: 1; visibility: visible; transform: none; }
+  .sub a {
+    display: block;
+    padding: .5rem var(--s4);
+    color: var(--ink);
+    text-decoration: none;
+    font-size: .875rem;
+  }
+  .sub a:hover { background: var(--indigo-tint); }
+
+  .nav__actions { display: flex; align-items: center; gap: var(--s4); }
+  .lang {
+    color: var(--white);
+    text-decoration: none;
+    font-size: .8125rem;
+    font-weight: 600;
+    border: 1px solid rgba(255,255,255,.35);
+    padding: .35rem .7rem;
+    border-radius: var(--radius);
+  }
+  .lang:hover { background: rgba(255,255,255,.12); }
+
+  .burger { display: none; background: none; border: 0; padding: .5rem; cursor: pointer; margin-inline-start: auto; }
+  .burger__bars, .burger__bars::before, .burger__bars::after {
+    display: block; width: 24px; height: 2px; background: var(--white); content: '';
+  }
+  .burger__bars::before { transform: translateY(-7px); }
+  .burger__bars::after  { transform: translateY(5px); }
+
+  @media (max-width: 1080px) {
+    .burger { display: block; }
+    .nav {
+      display: none;
+      position: absolute;
+      inset-inline: 0;
+      top: 100%;
+      background: var(--indigo-deep);
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
+      padding: var(--s4);
+      max-height: 75vh;
+      overflow-y: auto;
+    }
+    .nav[data-open] { display: flex; }
+    .nav__list { flex-direction: column; gap: 0; }
+    .nav__list > li > a { padding: .7rem 0; display: block; }
+    .sub {
+      position: static; opacity: 1; visibility: visible; transform: none;
+      background: transparent; box-shadow: none; padding: 0 0 var(--s3);
+      margin-inline-start: var(--s4);
+    }
+    .sub a { color: var(--indigo-pale); padding: .35rem 0; }
+    .sub a:hover { background: none; color: var(--white); }
+    .nav__actions { margin-block-start: var(--s4); }
+  }
+</style>
+
+<script>
+  const burger = document.querySelector('.burger');
+  const nav = document.getElementById('nav');
+  burger?.addEventListener('click', () => {
+    const open = nav.hasAttribute('data-open');
+    nav.toggleAttribute('data-open', !open);
+    burger.setAttribute('aria-expanded', String(!open));
+  });
+</script>

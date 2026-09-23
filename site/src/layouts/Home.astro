@@ -1,0 +1,187 @@
+---
+import Base from './Base.astro';
+import Countdown from '../components/Countdown.astro';
+import { home } from '../data/home.js';
+import { cta, url } from '../data/site.js';
+
+const { lang, title, description } = Astro.props;
+const c = home[lang];
+const t = cta[lang];
+---
+<Base title={title} description={description} lang={lang}>
+  <section class="hero" data-photo={c.heroPhoto ? 'yes' : 'no'}>
+    {c.heroPhoto && (
+      <img class="hero__bg" src={c.heroPhoto} alt="Print 2 Pack event photo" loading="eager" />
+    )}
+    <div class="wrap hero__body">
+      <p class="eyebrow">{c.eyebrow}</p>
+      <h1>{c.h1}<span>{c.h1sub}</span></h1>
+      <p class="hero__lede">{c.lede}</p>
+      <div class="hero__cta">
+        <a class="btn btn--primary" href={url(lang, 'book-a-stand/')}>{t.stand}</a>
+        <a class="btn btn--on-dark" href={url(lang, 'register/')}>{t.visit}</a>
+      </div>
+      <div class="hero__cd"><Countdown labels={c.countdownLabels} /></div>
+    </div>
+  </section>
+
+  <section class="facts">
+    <div class="wrap facts__grid">
+      {c.facts.map((f) => (
+        <div class="fact"><b>{f.n}</b><span>{f.label}</span></div>
+      ))}
+    </div>
+  </section>
+
+  <section class="wrap band">
+    <h2>{c.aboutTitle}</h2>
+    {c.about.map((p) => <p class="band__p">{p}</p>)}
+    <a class="btn btn--ghost" href={c.aboutLink.href}>{c.aboutLink.label}</a>
+  </section>
+
+  <section class="wrap band">
+    <h2>{c.sectorsTitle}</h2>
+    <div class="sectors">
+      {c.sectors.map((s) => (
+        <article class="sector">
+          <h3>{s.t}</h3>
+          <p>{s.d}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="wrap band">
+    <h2>{c.visitorsTitle}</h2>
+    <ul class="who">
+      {c.visitors.map((v) => <li>{v}</li>)}
+    </ul>
+  </section>
+
+  <section class="cta">
+    <div class="wrap cta__inner">
+      <div>
+        <h2>{c.ctaTitle}</h2>
+        <p>{c.ctaText}</p>
+      </div>
+      <a class="btn btn--primary" href={url(lang, 'book-a-stand/')}>{t.stand}</a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  /* The hero is built to take a photograph — drop a path into home.js and it fades in
+     behind this. Until the client supplies one, the ground is a halftone dot field:
+     the screen pattern that printing itself is made of. */
+  .hero {
+    position: relative;
+    isolation: isolate;
+    background: var(--indigo);
+    color: var(--white);
+    padding-block: var(--s8);
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -3;
+    background-image:
+      radial-gradient(circle at center, rgba(241,120,37,.55) 1.6px, transparent 1.7px),
+      radial-gradient(circle at center, rgba(255,255,255,.14) 1.1px, transparent 1.2px);
+    background-size: 26px 26px, 13px 13px;
+    background-position: 0 0, 6px 6px;
+    -webkit-mask-image: radial-gradient(120% 90% at 78% 22%, #000 0%, transparent 72%);
+            mask-image: radial-gradient(120% 90% at 78% 22%, #000 0%, transparent 72%);
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(90deg, rgba(8, 12, 32, 0.8) 0%, rgba(8, 12, 32, 0.55) 42%, rgba(8, 12, 32, 0.2) 100%);
+  }
+  [dir='rtl'] .hero::before {
+    -webkit-mask-image: radial-gradient(120% 90% at 22% 22%, #000 0%, transparent 72%);
+            mask-image: radial-gradient(120% 90% at 22% 22%, #000 0%, transparent 72%);
+  }
+  .hero__bg {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+    opacity: .86;
+    filter: grayscale(25%) contrast(1.08);
+  }
+  .hero[data-photo='yes']::before { opacity: .4; }
+  .hero__body {
+    position: relative;
+    z-index: 1;
+    width: min(100%, 46rem);
+    margin-inline: 0;
+    margin-right: auto;
+    max-width: min(58rem, 100%);
+    padding: clamp(1.25rem, 2vw, 2rem) clamp(1.25rem, 2vw, 2rem) clamp(1rem, 2vw, 1.5rem);
+    border-radius: 1rem;
+    background: rgba(8, 12, 32, 0.18);
+    backdrop-filter: blur(1px);
+    text-align: left;
+  }
+  [dir='rtl'] .hero__body {
+    margin-inline: 0;
+    margin-left: auto;
+    text-align: right;
+  }
+  .hero h1 { margin-block: var(--s4) var(--s5); max-width: 18ch; }
+  .hero h1 span { display: block; color: var(--indigo-pale); font-weight: 500; }
+  [dir='rtl'] .hero h1 span { font-weight: 600; }
+  .hero__lede { color: var(--indigo-pale); font-size: var(--step-1); line-height: 1.55; max-width: 54ch; }
+  .hero__cta { display: flex; flex-wrap: wrap; gap: var(--s4); margin-block-start: var(--s6); }
+  .hero__cd { margin-block-start: var(--s7); }
+
+  .facts { background: var(--indigo-tint); }
+  .facts__grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--s5); padding-block: var(--s6);
+  }
+  .fact b {
+    display: block; font-family: var(--display); font-size: clamp(1.75rem, 4vw, 2.5rem);
+    font-weight: 700; color: var(--indigo); line-height: 1; font-variant-numeric: tabular-nums;
+  }
+  .fact span {
+    font-size: .8125rem; letter-spacing: .12em; text-transform: uppercase; color: var(--indigo-muted);
+  }
+  [dir='rtl'] .fact span { letter-spacing: normal; text-transform: none; }
+
+  .band { padding-block: var(--s8) 0; }
+  .band h2 { margin-block-end: var(--s5); }
+  .band__p { font-size: var(--step-1); line-height: 1.6; color: var(--indigo-deep); }
+
+    /* Six items in auto-fit orphaned two on a second row at some widths.
+     Pinning the counts keeps it 3+3, then 2+2+2, then one column. */
+  .sectors { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--indigo-pale); border: 1px solid var(--indigo-pale); }
+  @media (max-width: 900px) { .sectors { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .sectors { grid-template-columns: 1fr; } }
+  .sector { background: var(--white); padding: var(--s5); }
+  .sector h3 { color: var(--indigo); margin-block-end: var(--s2); }
+  .sector p { margin: 0; font-size: .9375rem; color: var(--indigo-deep); }
+
+  .who { list-style: none; padding: 0; margin: 0; display: grid;
+         grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: var(--s3); }
+  .who li { position: relative; padding-inline-start: var(--s5); }
+  .who li::before {
+    content: ''; position: absolute; inset-inline-start: 0; inset-block-start: .6em;
+    width: 7px; height: 7px; background: var(--orange); border-radius: 1px;
+  }
+
+  .cta { background: var(--indigo-deep); color: var(--white); margin-block-start: var(--s9); }
+  .cta__inner {
+    display: flex; flex-wrap: wrap; gap: var(--s5); align-items: center;
+    justify-content: space-between; padding-block: var(--s7);
+  }
+  .cta h2 { margin-block-end: var(--s2); }
+  .cta p { color: var(--indigo-pale); margin: 0; }
+</style>

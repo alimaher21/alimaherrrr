@@ -1,0 +1,137 @@
+---
+import Page from '../layouts/Page.astro';
+import Blocks from '../components/Blocks.astro';
+import Form from '../components/Form.astro';
+import { pages, slugs } from '../data/pages.js';
+import content from '../data/content.json';
+
+export function getStaticPaths() {
+  return slugs.map((slug) => ({ params: { slug }, props: { slug } }));
+}
+
+const { slug } = Astro.props;
+const page = pages[slug];
+const blocks = content[slug]?.en ?? [];
+const isAbout = slug === 'about';
+
+// Two pages are forms, not prose.
+const FORM = { register: 'register', 'book-a-stand': 'stand' };
+---
+<Page page={page} lang="en" slug={slug}>
+  {FORM[slug]
+    ? <Form kind={FORM[slug]} lang="en" />
+    : isAbout
+      ? <div class="aboutpage">
+          <section class="about-hero">
+            <div class="about-hero__copy">
+              <div class="about-hero__eyebrow">PRINT2PACK</div>
+              <h2>About<br />Us</h2>
+              <p>PRINT2PACK is the inaugural trade event for the paper, printing, packaging and plastics industries in Saudi Arabia. Taking place from 16–18 November 2026 at the Jeddah Center for Exhibitions and Events, it brings manufacturers, converters, suppliers, buyers and trade visitors together to discover new technologies, build valuable connections and create business opportunities across Saudi Arabia and the GCC region.</p>
+            </div>
+            <div class="about-hero__image">
+              <img src="/img/WhatsApp%20Image%202026-09-23%20at%204.49.41%20PM.jpeg" alt="PRINT2PACK event entrance" />
+            </div>
+          </section>
+        </div>
+      : blocks.length > 0
+        ? <Blocks blocks={blocks} />
+        : <p class="todo">This page had no text content on the current site — it needs to be written.</p>}
+</Page>
+
+<style>
+  .todo {
+    margin-block-start: var(--s5);
+    padding: var(--s4);
+    border-inline-start: 3px solid var(--warning);
+    background: #FBF3E4;
+    color: var(--warning);
+    font-size: 0.9375rem;
+  }
+
+  .aboutpage {
+    --about-bg: #f3f1ef;
+    background: var(--about-bg);
+    padding-block: var(--s8) var(--s9);
+  }
+
+  .about-hero {
+    width: min(100% - 2.5rem, 1280px);
+    margin-inline: auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: clamp(1.5rem, 4vw, 4rem);
+    align-items: center;
+    padding-block: 0;
+  }
+
+  .about-hero__copy {
+    position: relative;
+    z-index: 2;
+    order: 1;
+    padding: clamp(1.25rem, 3vw, 2.5rem);
+    background: rgba(255, 255, 255, .88);
+  }
+
+  .about-hero__eyebrow {
+    font-family: var(--display);
+    font-size: .75rem;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-block-end: var(--s4);
+  }
+
+  .about-hero h2 {
+    position: relative;
+    z-index: 3;
+    font-size: clamp(5rem, 15vw, 13rem);
+    line-height: .82;
+    letter-spacing: -.04em;
+    margin: 0;
+    color: var(--indigo);
+  }
+
+  .about-hero__copy p {
+    max-width: 36rem;
+    margin-block-start: var(--s6);
+    color: var(--indigo-deep);
+    font-size: var(--step-1);
+    line-height: 1.65;
+  }
+
+  .about-hero__image {
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+    order: 2;
+  }
+
+  .about-hero__image img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 28rem;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  @media (max-width: 900px) {
+    .about-hero {
+      grid-template-columns: 1fr;
+    }
+
+    .about-hero__image img {
+      min-height: 20rem;
+      max-height: 28rem;
+    }
+
+    .about-hero__image {
+      order: 2;
+    }
+
+    .about-hero__copy {
+      order: 1;
+    }
+  }
+
+</style>

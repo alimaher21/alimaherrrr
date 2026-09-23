@@ -1,0 +1,84 @@
+---
+import '../styles/tokens.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { event, locales } from '../data/site.js';
+
+const { title, description, lang = 'en' } = Astro.props;
+const dir = locales[lang].dir;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+
+// Structured data, so search engines show the dates and venue directly.
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ExhibitionEvent',
+  name: `${event.name} ${event.edition} — Saudi Arabia`,
+  startDate: event.startISO,
+  endDate: event.endISO,
+  eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+  eventStatus: 'https://schema.org/EventScheduled',
+  location: {
+    '@type': 'Place',
+    name: event.venue.en,
+    address: { '@type': 'PostalAddress', streetAddress: event.address.en, addressCountry: 'SA' },
+  },
+  organizer: { '@type': 'Organization', name: event.organiser, email: event.email },
+  url: Astro.site?.href,
+};
+---
+<!doctype html>
+<html lang={lang} dir={dir}>
+  <head>
+    <meta charset="utf-8" />
+    <!-- Pinch-zoom stays enabled. The old site disabled it on all 26 pages. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content={lang === 'ar' ? 'ar_SA' : 'en_US'} />
+
+    <link rel="alternate" hreflang="en" href={new URL('/', Astro.site)} />
+    <link rel="alternate" hreflang="ar" href={new URL('/ar/', Astro.site)} />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Only the weights actually used. The old site downloaded 7 weights of Raleway
+         on every page and never used any of them. -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Poppins:wght@400;500;600&family=Cairo:wght@400;600;700&display=swap"
+    />
+
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  </head>
+
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <Header lang={lang} />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer lang={lang} />
+
+    <style>
+      .skip {
+        position: absolute;
+        inset-inline-start: var(--s4);
+        inset-block-start: -4rem;
+        z-index: 100;
+        background: var(--indigo);
+        color: var(--white);
+        padding: var(--s3) var(--s4);
+        text-decoration: none;
+        transition: inset-block-start .15s ease;
+      }
+      .skip:focus { inset-block-start: var(--s4); }
+    </style>
+  </body>
+</html>

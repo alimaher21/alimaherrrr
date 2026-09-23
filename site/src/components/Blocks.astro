@@ -1,0 +1,295 @@
+---
+// Renders the content pulled off the old site as clean, styled blocks.
+// The old markup is deliberately not carried over — only the words and the images.
+const { blocks = [] } = Astro.props;
+
+// Tables came out of the old site as a flat run of cells. Pairs are by far the most
+// common shape (label/value on the fact sheet, company/country on the exhibitor list).
+// Three or more images in a row is a gallery or a logo wall, not prose.
+// Group them so they render as a grid instead of a tall column of pictures.
+function group(list) {
+  const out = [];
+  for (const b of list) {
+    const last = out[out.length - 1];
+    if (b.type === 'image' && last?.type === 'imagegroup') last.images.push(b);
+    else if (b.type === 'image') out.push({ type: 'imagegroup', images: [b] });
+    else out.push(b);
+  }
+  return out.flatMap((b) =>
+    b.type === 'imagegroup' && b.images.length < 3 ? b.images : [b]
+  );
+}
+
+// A heading followed by a list is a titled group — render it as a card, not a bullet
+// column. This is what turns "Who exhibits" from a wall of text into three panels.
+function pair(list) {
+  const out = [];
+  for (let i = 0; i < list.length; i++) {
+    const b = list[i], next = list[i + 1];
+    if (b.type === 'heading' && next?.type === 'list') {
+      const last = out[out.length - 1];
+      const card = { title: b.text, items: next.items };
+      if (last?.type === 'cardset') last.cards.push(card);
+      else out.push({ type: 'cardset', cards: [card] });
+      i++;
+    } else out.push(b);
+  }
+  return out;
+}
+
+// A long two-column table of names and countries is a company directory, and reads far
+// better as cards than as 300 table rows.
+function directory(list) {
+  return list.map((b) => {
+    // The real table has one cell missing somewhere — 169 cells, not an even number —
+    // so don't insist on perfect pairing, just don't lose the last row.
+    if (b.type !== 'table' || b.items.length < 40) return b;
+    const entries = [];
+    for (let i = 2; i < b.items.length; i += 2) {
+      const name = b.items[i];
+      if (!name) continue;
+      entries.push({ name, country: b.items[i + 1] ?? '' });
+    }
+    return entries.length ? { type: 'directory', entries } : b;
+  });
+}
+
+const grouped = directory(pair(group(blocks)));
+
+function rows(items) {
+  if (items.length % 2 !== 0) return null;      // not a clean pair table — render as a list
+  const out = [];
+  for (let i = 0; i < items.length; i += 2) out.push([items[i], items[i + 1]]);
+  return out;
+}
+---
+{grouped.map((b) => {
+  if (b.type === 'heading') {
+    const Tag = `h${Math.min(b.level ?? 2, 4)}`;
+    return <Tag class="blk-h">{b.text}</Tag>;
+  }
+
+  if (b.type === 'paragraph') return <p class="blk-p">{b.text}</p>;
+
+  if (b.type === 'cardset') return (
+    <div class="blk-cards">
+      {b.cards.map((card) => (
+        <section class="blk-card">
+          <h3>{card.title}</h3>
+          <ul>{card.items.map((i) => <li>{i}</li>)}</ul>
+        </section>
+      ))}
+    </div>
+  );
+
+  // Long lists read badly as one tall column — let them flow into columns.
+  if (b.type === 'list') return (
+    <ul class={b.items.length > 8 ? 'blk-list blk-list--cols' : 'blk-list'}>
+      {b.items.map((i) => <li>{i}</li>)}
+    </ul>
+  );
+
+  if (b.type === 'directory') return (
+    <ul class="blk-dir">
+      {b.entries.map((e) => (
+        <li>
+          <span class="blk-dir__logo" aria-hidden="true">{e.name.trim().charAt(0)}</span>
+          <span class="blk-dir__text">
+            <b>{e.name}</b>
+            <em>{e.country}</em>
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+
+  if (b.type === 'table') {
+    const r = rows(b.items);
+    if (!r) return <ul class="blk-list">{b.items.map((i) => <li>{i}</li>)}</ul>;
+    return (
+      <div class="blk-tablewrap">
+        <table class="blk-table">
+          <tbody>
+            {r.map(([a, c]) => <tr><th scope="row">{a}</th><td>{c}</td></tr>)}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+
+  if (b.type === 'imagegroup') return (
+    <ul class="blk-grid" data-count={b.images.length}>
+      {b.images.map((i) => (
+        <li>
+          <img src={i.src} srcset={i.srcset} sizes="(max-width: 700px) 45vw, 220px"
+               width={i.width} height={i.height} alt={i.alt || ''} loading="lazy" decoding="async" />
+        </li>
+      ))}
+    </ul>
+  );
+
+  if (b.type === 'image') return (
+    <img
+      class="blk-img"
+      src={b.src}
+      srcset={b.srcset}
+      sizes="(max-width: 800px) 100vw, 760px"
+      width={b.width}
+      height={b.height}
+      alt={b.alt || ''}
+      loading="lazy"
+      decoding="async"
+    />
+  );
+
+  return null;
+})}
+
+<style>
+  .blk-h { margin-block: var(--s6) var(--s3); }
+  .blk-p { white-space: pre-line; }            /* the old site used <br> inside paragraphs */
+
+  .blk-list {
+    max-width: var(--measure);
+    margin-block: 0 var(--s4);
+    padding-inline-start: 0;
+    list-style: none;
+    display: grid;
+    gap: var(--s2);
+  }
+  .blk-list li { position: relative; padding-inline-start: var(--s5); }
+  .blk-list li::before {
+    content: '';
+    position: absolute;
+    inset-inline-start: 0;
+    inset-block-start: .62em;
+    width: 7px; height: 7px;
+    background: var(--orange);
+    border-radius: 1px;
+  }
+
+  .blk-list--cols {
+    max-width: none;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    column-gap: var(--s6);
+  }
+
+  .blk-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+    gap: 1px;
+    background: var(--indigo-pale);
+    border: 1px solid var(--indigo-pale);
+    margin-block: var(--s5) var(--s6);
+  }
+  .blk-card { background: var(--white); padding: var(--s5); }
+  .blk-card h3 {
+    color: var(--indigo);
+    margin-block-end: var(--s4);
+    padding-block-end: var(--s3);
+    border-block-end: 2px solid var(--orange);
+  }
+  .blk-card ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .4rem; }
+  .blk-card li {
+    font-size: .9375rem;
+    color: var(--indigo-deep);
+    padding-inline-start: var(--s4);
+    position: relative;
+  }
+  .blk-card li::before {
+    content: '';
+    position: absolute;
+    inset-inline-start: 0;
+    inset-block-start: .6em;
+    width: 5px; height: 5px;
+    background: var(--indigo-muted);
+    border-radius: 50%;
+  }
+
+  .blk-dir {
+    list-style: none;
+    padding: 0;
+    margin-block: var(--s5) var(--s6);
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1px;
+    background: var(--indigo-pale);
+    border: 1px solid var(--indigo-pale);
+  }
+  .blk-dir li {
+    background: var(--white);
+    padding: var(--s4);
+    display: flex;
+    align-items: center;
+    gap: var(--s4);
+    min-width: 0;
+  }
+  /* Placeholder until the client tells us which logo belongs to which company. */
+  .blk-dir__logo {
+    flex: 0 0 auto;
+    width: 42px; height: 42px;
+    display: grid; place-items: center;
+    background: var(--indigo-tint);
+    color: var(--indigo);
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 1.15rem;
+    border-radius: var(--radius);
+  }
+  .blk-dir__text { min-width: 0; display: flex; flex-direction: column; }
+  .blk-dir__text b { font-size: .9375rem; font-weight: 600; line-height: 1.3; }
+  .blk-dir__text em {
+    font-style: normal; font-size: .75rem; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--indigo-muted); margin-block-start: .2rem;
+  }
+  [dir='rtl'] .blk-dir__text em { letter-spacing: normal; text-transform: none; }
+
+  .blk-tablewrap { overflow-x: auto; margin-block: var(--s4) var(--s5); }
+  .blk-table { border-collapse: collapse; width: 100%; max-width: 760px; }
+  .blk-table th, .blk-table td {
+    text-align: start;
+    padding: .7rem var(--s4);
+    border-block-end: 1px solid var(--indigo-pale);
+    vertical-align: top;
+    font-size: .9375rem;
+  }
+  .blk-table th {
+    font-family: var(--display);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    font-size: .8125rem;
+    color: var(--indigo);
+    white-space: nowrap;
+  }
+  [dir='rtl'] .blk-table th { text-transform: none; letter-spacing: normal; }
+  .blk-table tr:nth-child(even) { background: var(--indigo-tint); }
+
+  .blk-grid {
+    list-style: none;
+    padding: 0;
+    margin-block: var(--s5) var(--s6);
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1px;
+    background: var(--indigo-pale);
+    border: 1px solid var(--indigo-pale);
+  }
+  .blk-grid li {
+    background: var(--white);
+    aspect-ratio: 3 / 2;
+    display: grid;
+    place-items: center;
+    padding: var(--s4);
+  }
+  .blk-grid img { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; }
+
+  /* width and height are set on the element, so the browser reserves the space and
+     the page does not jump while images load. */
+  .blk-img {
+    margin-block: var(--s4) var(--s5);
+    border-radius: var(--radius);
+    max-width: min(100%, 760px);
+    height: auto;
+  }
+</style>

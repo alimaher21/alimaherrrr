@@ -1,0 +1,75 @@
+---
+import { event } from '../data/site.js';
+const { lang = 'en' } = Astro.props;
+const { lat, lon } = event.coords;
+
+// A flat image, built once by map.py from OpenStreetMap tiles and served from our own
+// domain. The OSM embed iframe now requires WebGL and shows an error panel instead of a
+// map on anything that lacks it. No iframe, no third-party script, no cookies.
+const directions = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`;
+
+const t = lang === 'ar'
+  ? { title: 'الوصول إلى المعرض', dir: 'احصل على الاتجاهات',
+      alt: 'خريطة تُظهر موقع مقر المعرض في حي النزهة بجدة' }
+  : { title: 'Getting there', dir: 'Get directions',
+      alt: 'Map showing the venue in the Al Nuzha district of Jeddah' };
+---
+<div class="map">
+  <a class="map__img" href={directions} target="_blank" rel="noopener">
+    <img
+      src="/img/venue-map-1200.webp"
+      srcset="/img/venue-map-700.webp 700w, /img/venue-map-1200.webp 1200w"
+      sizes="(max-width: 760px) 100vw, 60vw"
+      width="1200" height="460"
+      alt={t.alt} loading="lazy" decoding="async"
+    />
+    <span class="map__credit">© OpenStreetMap contributors</span>
+  </a>
+
+  <div class="map__meta">
+    <h3>{t.title}</h3>
+    <p>
+      <strong>{event.venue[lang] ?? event.venue.en}</strong><br />
+      {event.address[lang] ?? event.address.en}
+    </p>
+    <a class="btn btn--ghost" href={directions} target="_blank" rel="noopener">{t.dir}</a>
+  </div>
+</div>
+
+<style>
+  .map {
+    display: grid;
+    grid-template-columns: 1.7fr 1fr;
+    gap: 1px;
+    background: var(--indigo-pale);
+    border: 1px solid var(--indigo-pale);
+  }
+  .map__img { position: relative; display: block; line-height: 0; overflow: hidden; }
+  .map__img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .map__credit {
+    position: absolute;
+    inset-block-end: 0;
+    inset-inline-end: 0;
+    background: rgba(255,255,255,.82);
+    color: var(--ink);
+    font-size: 10px;
+    line-height: 1.6;
+    padding: 2px 6px;
+    font-family: var(--body);
+  }
+  .map__meta {
+    background: var(--white);
+    padding: var(--s5);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: var(--s3);
+  }
+  .map__meta h3 { color: var(--indigo); margin: 0; }
+  .map__meta p { margin: 0; font-size: .9375rem; color: var(--indigo-deep); }
+  @media (max-width: 760px) {
+    .map { grid-template-columns: 1fr; }
+    .map__img img { max-height: 240px; }
+  }
+</style>
